@@ -1,0 +1,320 @@
+
+
+clc
+
+close(allchild(0))
+
+% create interactive message box 
+uiwait(msgbox("Hello welcome to tic tac toe! Let''s get started!"))
+%Create background figure Where player selects mode
+playerSelected = figure("units","normalized","Position",[.25 .25 .5 .5],...
+    "Color",[0.1 0.5 0.8],"ToolBar","none"...
+    ,MenuBar="none");
+textType = uicontrol("Style","text","units","normalized","Position",...
+    [.125 .8 .75 .125],"String","What mode would you like to play in: Click to Start",...
+    "FontSize",15,"FontWeight","bold","BackgroundColor",[0.1 0.5 0.8])
+%Create pushbuttons for player to choose whether they would like to play in
+%player vs player or player vs computer
+
+PvP = uicontrol("Style","Pushbutton","units","normalized","Position",...
+    [.125 .25 .25 .5],'UserData','PvP','String',...
+    "Player Vs Player",'FontSize',13,'FontWeight','bold');
+PvC = uicontrol("Style","Pushbutton","units","normalized","Position",...
+    [.625 .25 .25 .5],'UserData','PvC','String',...
+    "Player Vs Computer",'FontSize',13,'FontWeight','bold');
+% run created pushbutton function
+PvP.Callback = {@playMode,PvP,PvC};
+PvC.Callback = {@playMode,PvC,PvP};
+
+%Create function for pushbuttons that determines which mode the user
+%chooses and then removes button funcitonality after choice is made.
+
+function playMode(object,~,PvP,PvC);
+
+if strcmpi(object.UserData,"PvP");
+    %Turn of button function once user has selected mode
+    PvP.Enable ="off";
+    PvC.Enable ="off";
+%create text box that prompts user to enter their name
+Player1Text = uicontrol('Style','text',"String",'Player 1 name:','fontsize',12,'fontweight','bold',...
+    'Units','normalized','Position',[.0625 .125 .2 .0625]);
+%create text box that can be edited where user types name
+Player1 = uicontrol("Style","edit",'Units','normalized','Position',[.2625 .125 .2 .0625]);
+Player2Text = uicontrol("Style","text","String","Player 2 name:",'Fontsize',12,'fontweight','bold',...
+    'Units', 'normalized','Position',[.53625 .125 .2 .0625]);
+Player2 = uicontrol("Style","edit",'Units','normalized','Position',[.73625 .125 .2 .0625]);
+% callback function that makes start button available upon click.
+Player1.Callback = {@startButton,'PvP',Player1,Player2};
+Player2.Callback = {@startButton,'PvP',Player1,Player2};
+
+elseif strcmpi(object.UserData,"PvC");
+    PvP.Enable ="off";
+    PvC.Enable ="on";
+Player1Text = uicontrol('Style','text',"String",'Player 1 name:','fontsize',12,'fontweight','bold',...
+    'Units','normalized','Position',[.0625 .125 .2 .0625]);
+Player1 = uicontrol("Style","edit",'Units','normalized','Position',[.2625 .125 .2 .0625]);
+%callback start buton when player selects computer as opponent and enters
+%their name
+Player1.Callback = {@startButton,'PvC',Player1,''};
+end
+end
+
+function startButton(~,~,Mode,Player1,Player2);
+
+if strcmpi(Mode,'PvC');
+    P2 = 'Computer';
+else P2 = Player2.String;
+end
+P1 = Player1.String;
+if ~isempty(P1) && ~isempty(P2);
+
+startGame = uicontrol("Style","Pushbutton","units","normalized","Position",...
+[.3525 .0525 .25 .0625],'String',...
+"Start",'FontSize',13,'FontWeight','bold','BackgroundColor', [0 .8 0]);
+startGame.Callback = {@mainGame,Mode,P1,P2};
+end
+end
+
+
+
+
+
+
+function mainGame(~,~,PlayerMode,player1name,player2name)
+close(allchild(0))
+
+clc
+
+player1name = 'person 1'
+player2name = 'person 2 or computer'
+
+
+
+scrnSz = get(groot,'ScreenSize');
+
+
+% make figure on which board will go and auto size to computer
+scrnSz = get(groot,'ScreenSize');
+bColor = [0.1 0.5 0.8];
+Main = figure('Position',scrnSz,'Color',bColor, ...
+    'MenuBar','none',...
+    'NumberTitle','off','Pointer','hand','Visible','on');
+
+
+
+%Variables related to title figure
+gameTitle = uicontrol('Style','text','Units','normalized','Position',[.325 .91 .4 .08],...
+    'String',"Welcome to Tic Tac Toe!", 'FontWeight','bold','FontSize',28,...
+    'BackgroundColor',bColor);
+WhosTurn = uicontrol('Style','text','Units','normalized','Position',...
+   [.1 .85 .1 .05],'String',"Your Turn:",'FontWeight','bold',...
+   'FontSize',20,'BackgroundColor',bColor);
+player1Wins = uicontrol('Style','text','Visible','on','String',[player1name,'''s number of wins'],...
+   'BackgroundColor',bColor,'units','normalized',...
+    'Position',[.1 .65 .06 .1],'FontWeight','bold',...
+    'FontSize',14)
+player2Wins = uicontrol('Style','text','Visible','on','String',[player2name,'''s number of wins'],...
+    'BackgroundColor',bColor,'units','normalized',...
+   'Position',[.17 .655 .1 .1],'FontWeight','bold',...
+    'FontSize',14)
+
+
+
+%set first player to random
+fpOrder = round(rand);
+if fpOrder == 0
+
+    startPlayerName = player1name;
+    NUM = 1;
+    otherplayer = player2name;
+else
+    startPlayerName = player2name;
+    NUM = -1;
+    otherplayer = player1name;
+end
+
+% create pictures for players and computer and randomize which pictures are
+% chosen for which player.
+%computer player pictures first:
+if strcmpi(player2name,'Computer')
+    optPCpic = {'c3po','dvr'};
+    PCpic = optPCpic{randi([1,length(optPCpic)])};
+    pic2name = sprintf('%s.jpg',PCpic);
+    pic2 = imread(pic2name);
+    
+end
+
+%player picturee choices
+optPlayerpic = {'yda','jrjr','chwy','bb8'};
+RAND = randperm(length(optPlayerpic));
+Play1pic = optPlayerpic{RAND(1)};
+pic1name = sprintf('%s.jpg',Play1pic);
+pic1 = imread(pic1name);
+
+
+if ~strcmpi(player2name,'Computer')
+    Play2pic = optPlayerpic{RAND(2)};
+    pic2name = sprintf('%s.jpg',Play2pic);
+    pic2 = imread(pic2name);
+    
+end
+
+
+
+% track gameplay data and allow for repeat of gameplay or exit of gameplay
+Data.youreup = uicontrol('Style','text','String',startPlayerName,'units','normalized',...
+    'Position',[.1 .75 .1 .1],'FontWeight','bold',...
+    'FontSize',20,'BackgroundColor',bColor,'Value',NUM,'UserData',otherplayer);
+
+Data.trackplayed = uicontrol('Style','text','Visible','off','UserData',zeros(3,3));
+Data.player1 = uicontrol('Style','text','Visible','on','String',0,'Value',1,'UserData',0,...
+    'BackgroundColor',bColor,'units','normalized',...
+    'Position',[.1 .5 .05 .1],'FontWeight','bold',...
+    'FontSize',12);
+Data.player2 = uicontrol('Style','text','Visible','on','String',0,'Value',-1,'UserData',0,...
+    'BackgroundColor',bColor,'units','normalized',...
+    'Position',[.15 .5 .15 .1],'FontWeight','bold',...
+    'FontSize',12);
+Data.restart = uicontrol('Style','pushbutton','Units','normalized','Position',[.05,.25,.2,.1],...
+    'Visible','off','String','Play Again','FontSize',20,'BackgroundColor',[0,.7,0],'FontWeight','bold');
+Data.player1button = uicontrol('Style','text','Visible','off','string',player1name,'UserData',pic1)
+Data.player2button = uicontrol('Style','text','Visible','off','string',player2name,'UserData',pic2)
+ExitGame = uicontrol('Style','pushbutton','Units','normalized','Position',[.025,.15,.1,.05],...
+    'Visible','on','String','Exit','FontSize',20,'BackgroundColor',[.7,0,0],'FontWeight','bold','Callback',{@ExitGameCallback,Main});
+
+
+while ExitGame == false
+    drawnow
+    if ExitGame == true
+        break
+    end
+end
+%make tic tac toe grid and set variables for autosizing buttons to screen
+W2Hratio = scrnSz(3)/scrnSz(4);
+H = .15*W2Hratio;
+B2T = .9 - H;
+W = .15;
+gap = .001;
+% set for loop to create button matrix instead of having to hard code each
+% button
+for across = 1:3
+    L2R = .3;
+    for down = 1:3
+       
+grid{down,across} = uicontrol("Style","pushbutton","Units","normalized",...
+    "Position",[L2R,B2T,W,H],'UserData',[down,across]);
+L2R = L2R+W+gap;
+
+    end
+    B2T = B2T - (H + gap*W2Hratio);
+end
+% if computer goes first, randomly assign a button to computer's spot
+if strcmpi(PlayerMode,'PvC') && strcmpi(startPlayerName,player2name)
+    pause(1)
+firstmoverow = randi([1,3]);
+firstmovecol = randi([1,3]);
+grid{firstmovecol,firstmoverow}.CData = pic2;
+Data.youreup.UserData = startPlayerName;
+Data.youreup.String = otherplayer;
+Data.youreup.Value = -NUM;
+StartBoard = zeros(3,3);
+StartBoard(firstmoverow,firstmovecol) = -1;
+Data.trackplayed.UserData = StartBoard;
+end
+
+for across = 1:3
+    
+    for down = 1:3
+       
+set(grid{down,across},'Callback',{@Play,grid,Data,PlayerMode})
+
+
+    end
+ 
+end
+% this function keeps track of where a player clicks and which pic to put
+% in button if player clicks.
+function Play(object,~,grid,Data,PlayerMode)
+pos = object.UserData
+
+    if strcmpi(Data.youreup.String, Data.player1button.String)
+            grid{pos(1),pos(2)}.CData = Data.player1button.UserData;
+        elseif strcmpi(Data.youreup.String, Data.player2button.String)
+            grid{pos(1),pos(2)}.CData = Data.player2button.UserData;
+            
+        else
+            fprintf('Error. Player not found. Fix this...?\n')
+        end
+
+ set(grid{pos(1),pos(2)},'Callback',[])
+Board = Data.trackplayed.UserData
+Board(pos(2),pos(1)) = Data.youreup.Value
+Data.trackplayed.UserData = Board;
+% This function looks for a win condition by summing rows collumns and
+% diagonals.
+[IFWIN, WINNER] = CheckWin (Board);
+
+[Data,grid] = PostWinCheck(IFWIN,WINNER,Data,grid);
+%this line of code looks for win/tie conditions and if found calls the
+%restart function to be available.
+
+ if strcmpi(IFWIN,'yes') || strcmpi(IFWIN,'tie')
+            Data.restart.Callback = {@RestartGame,grid,Data,PlayerMode};
+ end
+
+       if strcmpi(PlayerMode,'PVC') && strcmpi(IFWIN,'no')
+            Data.youreup.Value;
+            Data.youreup.String;
+            PosPlay = pcPlay(Board);
+            Board(PosPlay(1),PosPlay(2)) = Data.youreup.Value;
+            grid{PosPlay(2),PosPlay(1)}.CData = Data.player2button.UserData;
+            set(grid{PosPlay(2),PosPlay(1)},'Callback',[])
+            Data.trackplayed.UserData = Board;
+            [IFWIN, WINNER] = CheckWin (Board);
+            [Data,grid] = PostWinCheck(IFWIN,WINNER,Data,grid);
+            if strcmpi(IFWIN,'yes') || strcmpi(IFWIN,'tie')
+                Data.restart.Callback = {@RestartGame,grid,Data,PlayerMode};
+            end
+       end
+
+
+           end
+
+% this function gives functionality to the restart button in the gui.
+
+    function RestartGame(object,~,grid,DATA,PlayerMode)
+        
+        object.Visible = 'off';
+        for across2 = 1:3
+            for down2 = 1:3
+                set(grid{down2,across2},'enable','on','String','','CData',[])
+                set(grid{down2,across2},'Callback',{@Play,grid,DATA,PlayerMode})
+            end
+        end
+
+               if strcmpi(PlayerMode,'PvC') && strcmpi(DATA.youreup.String,'Computer')
+            pause(1)
+            firstmoverow1 = randi([1,3]);
+            firstmovecol1 = randi([1,3]);
+            grid{firstmovecol1,firstmoverow1}.CData = DATA.player2button.UserData;
+            DATA.youreup.String = DATA.youreup.UserData;
+            DATA.youreup.UserData = 'Computer';
+            DATA.youreup.Value = -DATA.youreup.Value;
+            StartBoard1 = zeros(3,3);
+            StartBoard1(firstmoverow1,firstmovecol1) = -1;
+            DATA.trackplayed.UserData = StartBoard1;
+        end
+        
+    end
+
+
+%this function gives functionality to exit button in gui.
+
+
+    function ExitGameCallback(~,~,Main)
+        
+            delete(Main)
+        end
+end
+
+
