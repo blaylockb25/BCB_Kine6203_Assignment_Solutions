@@ -1,0 +1,154 @@
+  Assign4data = importfile("isok_data_6803.csv", [2, Inf]);
+  % Import data to be utilized and seperate it into individual variables columnwise using dot notation. 
+SubjectID = Assign4data.SubjectID;
+Age = Assign4data.Age;
+Gender = Assign4data.Gender;
+Weight = Assign4data.Weight;
+Day1 = Assign4data.Day1;
+Day2 = Assign4data.Day2;
+Day3 = Assign4data.Day3;
+% Call function to compute different required data means and display to
+% command window.
+
+[maleIsoIndMeans, femaleIsoIndMeans,maleGroupIsoMean,femaleGroupIsoMean] = genderIsoCalc(Assign4data);
+
+
+disp(maleIsoIndMeans);
+disp(femaleIsoIndMeans);
+disp(maleGroupIsoMean);
+disp(femaleGroupIsoMean);
+% call function to determine which subjects displayed an increased strength
+% across the different day variables and assign them to the correct
+% variable names.
+
+day1toDay2 = dayComparer(SubjectID,Day1,Day2);
+day2toDay3 = dayComparer(SubjectID,Day2,Day3);
+%normalize the strength data to each subjects weight.
+
+weightday1 = Weight./Day1;
+weightday2 = Weight./Day2;
+weightday3 = Weight./Day3;
+disp(weightday1)
+disp(weightday2)
+disp(weightday3)
+% calculate the normalized mean data for each individual day.
+
+normDay1Mean = mean(weightday1);
+normDay2Mean = mean(weightday2);
+normDay3Mean = mean(weightday3);
+disp(normDay1Mean)
+disp(normDay2Mean)
+disp(normDay3Mean)
+%Standardize the variable formats to string to enable easier export.
+
+day1toDay2 = string(day1toDay2);
+day2toDay3 = string(day2toDay3);
+femaleGroupIsoMean = string(femaleGroupIsoMean);
+femaleIsoIndMeans = string(femaleIsoIndMeans);
+maleGroupIsoMean = string(maleGroupIsoMean);
+maleIsoIndMeans = string(maleIsoIndMeans);
+normDay1Mean = string(normDay1Mean);
+normDay2Mean = string(normDay2Mean);
+normDay3Mean = string(normDay3Mean);
+% determine the maximum dimensions of each variable to assist in reshaping.
+
+maxrows = max([size(normDay3Mean,1), size(normDay2Mean,1),size(normDay1Mean,1),...
+    size(maleIsoIndMeans,1),size(maleGroupIsoMean,1),size(femaleIsoIndMeans,1),...
+    size(femaleGroupIsoMean,1),size(day2toDay3,1),size(day1toDay2,1)]);
+maxcols = max([size(normDay1Mean,2),size(normDay2Mean,2), size(normDay3Mean,2),...
+    size(maleGroupIsoMean,2),size(maleIsoIndMeans,2),size(femaleGroupIsoMean,2),size(femaleIsoIndMeans,2),...
+    size(day1toDay2,2),size(day2toDay3,2)]);
+% make each variable dimension have the same number of columns to allow for
+% concatenation.
+
+
+femaleIsoIndMeans = reshape(femaleIsoIndMeans,[],2);
+maleIsoIndMeans(14) = nan;
+maleIsoIndMeans = reshape(maleIsoIndMeans,[],2);
+maleGroupIsoMean(2:4) = nan;
+maleGroupIsoMean = reshape(maleGroupIsoMean,[],2);
+femaleGroupIsoMean(2:4) = nan;
+femaleGroupIsoMean = reshape(femaleGroupIsoMean,[],2);
+normDay1Mean(2:4) = nan;
+normDay1Mean = reshape(normDay1Mean,[],2);
+normDay2Mean(2:4) = nan;
+normDay2Mean = reshape(normDay2Mean,[],2);
+normDay3Mean(2:4) = nan;
+normDay3Mean = reshape(normDay3Mean,[],2);
+day1toDay2 = reshape(day1toDay2,[],2);
+day2toDay3(12) = nan;
+day2toDay3 = reshape(day2toDay3,[],2);
+%produce title variables so data is more readable once exported and format
+%them correctly to allow for inclusion.
+
+male = 'maleIsoIndMeans';
+
+male = string(male);
+disp(male)
+
+male1 = 'maleGroupIsoMean';
+
+male1 = string(male1);
+
+female = 'femaleIsoIndMeans';
+female = string(female);
+
+female1 = 'femaleGroupIsoMean';
+female1 = string(female1);
+
+norm1 = 'normDay1aMean';
+norm1 = string(norm1);
+
+norm2 = 'normDay2Mean';
+norm2 = string(norm2);
+
+norm3 = 'normDay3Mean';
+norm3 = string(norm3);
+d12 = 'day1toDay2';
+d12 = string(d12);
+
+d23 = 'day2toDay3';
+d23 = string(d23);
+
+
+d23(2:4) = nan;
+d12(2:4) = nan;
+norm1(2:4) = nan;
+norm2(2:4) = nan;
+norm3(2:4) = nan;
+female(2:4) = nan;
+female1(2:4) = nan;
+male(2:4) = nan;
+male1(2:4) = nan;
+
+
+d23 = reshape(d23,[],2);
+d12 = reshape(d12,[],2);
+norm1 = reshape(norm1,[],2);
+norm2 = reshape(norm2,[],2);
+norm3 = reshape(norm3,[],2);
+female = reshape(female,[],2);
+female1 = reshape(female1,[],2);
+male = reshape(male,[],2);
+male1 = reshape(male1,[],2);
+%concatinate all variables back into a table to allow for export utilizing
+%the write matrix function and export data to correct file name and type.
+
+
+result = vertcat(norm3,normDay3Mean,norm2,normDay2Mean,norm1,normDay1Mean,female1,femaleGroupIsoMean,male1,maleGroupIsoMean,female,femaleIsoIndMeans,...
+   male,maleIsoIndMeans,d12,day1toDay2,d23,day2toDay3);
+disp(result)
+
+writematrix(result,'iso_results.csv')
+
+
+
+
+
+
+
+
+
+
+
+
